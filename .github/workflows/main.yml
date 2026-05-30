@@ -33,14 +33,15 @@ jobs:
           CIBW_BUILD: "cp314-*"
           CIBW_PRERELEASE_PYTHONS: "True"
           CIBW_SKIP: "*-win32"
-          # ИСПРАВЛЕНО: синтаксис %PATH% для корректного расширения системного окружения Windows
-          CIBW_ENVIRONMENT_WINDOWS: >
+          # ИСПРАВЛЕНО: используем встроенный в cibuildwheel синтаксис $PATH
+          # Символ "|" вместо ">" сохраняет структуру переменных построчно без склеивания в кашу
+          CIBW_ENVIRONMENT_WINDOWS: |
             Protobuf_ROOT="C:/vcpkg/installed/x64-windows"
             CMAKE_PREFIX_PATH="C:/vcpkg/installed/x64-windows"
             PROTOC="C:/vcpkg/installed/x64-windows/tools/protobuf/protoc.exe"
             INCLUDE="C:/vcpkg/installed/x64-windows/include"
             LIB="C:/vcpkg/installed/x64-windows/lib"
-            PATH="%PATH%;C:/vcpkg/installed/x64-windows/tools/protobuf"
+            PATH="$PATH;C:/vcpkg/installed/x64-windows/tools/protobuf"
         run: python -m cibuildwheel --output-dir wheelhouse
 
       - name: Загрузить артефакт
