@@ -33,8 +33,14 @@ jobs:
           CIBW_BUILD: "cp314-*"
           CIBW_PRERELEASE_PYTHONS: "True"
           CIBW_SKIP: "*-win32"
-          # ИСПРАВЛЕНО: используем встроенный в cibuildwheel синтаксис $PATH
-          # Символ "|" вместо ">" сохраняет структуру переменных построчно без склеивания в кашу
+          
+          # ИСПРАВЛЕНИЕ 1: Отключаем изоляцию сборки pip/build, чтобы скрипт setup.py видел системные пути
+          CIBW_CONFIG_SETTINGS: "--config-setting=--global-option=--no-build-isolation"
+          
+          # ИСПРАВЛЕНИЕ 2: Устанавливаем зависимости компиляции прямо в окружение перед сборкой
+          CIBW_BEFORE_BUILD: "pip install setuptools wheel pybind11"
+
+          # Корректные пути к vcpkg Protobuf
           CIBW_ENVIRONMENT_WINDOWS: |
             Protobuf_ROOT="C:/vcpkg/installed/x64-windows"
             CMAKE_PREFIX_PATH="C:/vcpkg/installed/x64-windows"
