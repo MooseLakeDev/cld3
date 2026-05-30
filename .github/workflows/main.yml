@@ -1,40 +1,48 @@
-name: Build cld3 wheels (Windows only)
+name: Build cld3 wheel (Windows, Python 3.14 only)
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:   # позволяет запускать вручную
 
 jobs:
   wheel:
-    name: windows-wheel
+    name: cp314-win_amd64
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Установить Python (для запуска cibuildwheel)
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'   # для запуска cibuildwheel
+          python-version: '3.11'
 
-      - name: Install cibuildwheel
+      - name: Установить cibuildwheel
         run: pip install cibuildwheel
 
-      - name: Install Protobuf
+      - name: Установить Protobuf
         run: |
-          vcpkg integrate install
           vcpkg install protobuf:x64-windows
         shell: pwsh
 
-      - name: Build wheels
+      - name: Собрать wheel
         env:
-          CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-* cp313-* cp314-*"
+          CIBW_BUILD: "cp314-*"
           CIBW_PRERELEASE_PYTHONS: "True"
           CIBW_SKIP: "*-win32"
           CIBW_ENVIRONMENT_WINDOWS: >
+            Protobuf_ROOT="C:/vcpkg/installed/x64-windows"
+            CMAKE_PREFIX_PATH="C:/vcpkg/installed/x64-windows"
             PROTOC="C:/vcpkg/installed/x64-windows/tools/protobuf/protoc.exe"
             INCLUDE="C:/vcpkg/installed/x64-windows/include"
             LIB="C:/vcpkg/installed/x64-windows/lib"
+            PATH="$env:PATH;C:/vcpkg/installed/x64-windows/tools/protobuf"
         run: python -m cibuildwheel --output-dir wheelhouse
 
-      - uses: actions/upload-artifact@v4
+      - name: Загрузить артефакт
+        uses: actions/upload-artifact@v4
         with:
-          name: windows-wheels
+          name: cld3-cp314-win_amd64
           path: wheelhouse/*.whl
